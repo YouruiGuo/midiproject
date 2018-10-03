@@ -1,0 +1,115 @@
+<html>
+  <head>
+
+    <script src="js/midi/AudioDetect.js" type="text/javascript"></script>
+    <script src="js/midi/plugin.audiotag.js" type="text/javascript"></script>
+    <script src="js/midi/plugin.webaudio.js" type="text/javascript"></script>
+    <script src="js/midi/plugin.webmidi.js" type="text/javascript"></script>
+    <!--<script src="js/midi/LoadPlugin.js" type="text/javascript"></script>
+    <script src="js/midi/Plugin.js" type="text/javascript"></script>-->
+    <script src="js/midi/player.js" type="text/javascript"></script>
+    <script src="js/midi/loader.js" type="text/javascript"></script>
+
+  </head>
+  <body>
+    <script type="text/javascript">
+
+        var keyState = Object.freeze ({unpressed: {}, note_on: {}, pressed:{}, note_off:{} });
+
+        var keys_down = [];
+        var keys_obj = [];
+
+        initialize();
+
+        function initialize () {
+            for (var i = 0; i < 222; i++) {
+              keys_down[i] = false;
+            }
+        }
+
+        function keyCode_to_note( keyCode)
+        {
+            var note = -1;
+            //-----------------------------------
+            if(   keyCode==90 )  note= 0; // C 0
+            if(   keyCode==83 )  note= 1; // C#0
+            if(   keyCode==88 )  note= 2; // D 0
+            if(   keyCode==68 )  note= 3; // D#0
+            if(   keyCode==67 )  note= 4; // E 0
+            if(   keyCode==86 )  note= 5; // F 0
+            if(   keyCode==71 )  note= 6; // F#0
+            if(   keyCode==66 )  note= 7; // G 0
+            if(   keyCode==72 )  note= 8; // G#0
+            if(   keyCode==78 )  note= 9; // A 0
+            if(   keyCode==74 )  note=10; // A#0
+            if(   keyCode==77 )  note=11; // B 0
+            if(   keyCode==188 ) note=12; // C 0
+
+            //-----------------------------------
+            if(   keyCode==81 )  note=12; // C 1
+            if(   keyCode==50 )  note=13; // C#1
+            if(   keyCode==87 )  note=14; // D 1
+            if(   keyCode==51 )  note=15; // D#1
+            if(   keyCode==69 )  note=16; // E 1
+            if(   keyCode==82 )  note=17; // F 1
+            if(   keyCode==53 )  note=18; // F#1
+            if(   keyCode==84 )  note=19; // G 1
+            if(   keyCode==54 )  note=20; // G#1
+            if(   keyCode==89 )  note=21; // A 1
+            if(   keyCode==55 )  note=22; // A#1
+            if(   keyCode==85 )  note=23; // B 1
+            //-----------------------------------
+            if(   keyCode==73 )  note=24; // C 2
+            if(   keyCode==57 )  note=25; // C#2
+            if(   keyCode==79 )  note=26; // D 2
+            if(   keyCode==48 )  note=27; // D#2
+            if(   keyCode==80 )  note=28; // E 2
+            if(   keyCode==219 ) note=29; // F 2
+            if(   keyCode==187 ) note=30; // F#2
+            if(   keyCode==221 ) note=31; // G 2
+            //-----------------------------------
+
+            if( note == -1 ) return -1;
+
+            return ("_" + note);
+
+        }
+
+
+          document.addEventListener("keydown", function(ev) {
+
+            if (keys_down[ev.keyCode] == false)
+            {
+                var note = keyCode_to_note(ev.keyCode);
+                if (note != -1)
+                {
+                    keys_down[ev.keyCode] = true;
+
+                    var delay = 0; // play one note every quarter second
+                    var note = parseInt(note.substr(1))+21; // the MIDI note
+                    var velocity = 127; // how hard the note hits
+                    console.log(MIDI.WebAudio);
+                    MIDI.WebAudio.setVolume(0, 127);
+                    MIDI.WebAudio.noteOn(0, note, velocity, delay);
+                }
+            }
+          })
+
+          document.addEventListener('keyup', function(ev) {
+
+            if (keys_down[ev.keyCode] == true)
+            {
+                var note = keyCode_to_note(ev.keyCode);
+                keys_down[ev.keyCode] = false;
+                var delay = 0; // play one note every quarter second
+                var note = parseInt(note.substr(1))+21;
+                var velocity = 127;// how hard the note hits
+                console.log(MIDI);
+                MIDI.WebAudio.setVolume(0, 127);
+                MIDI.WebAudio.noteOff(0, note, delay + 0.08);
+            }
+          })
+
+      </script>
+  </body>
+</html>
