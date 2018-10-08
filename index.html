@@ -1,22 +1,28 @@
 <html>
   <head>
     <script src="node_modules/webmidi/webmidi.min.js"></script>
-
+    <script src="js/markov.js"></script>
   </head>
   <body>
+    <div>
+      <button type="button" onclick="start()">start</button>
+      <button type="button" onclick="stop()">stop</button>
+    </div>
+    <div id="generate_music"></div>
+
     <script type="text/javascript">
 
     WebMidi.enable(function (err) {
       var output = WebMidi.outputs[0];
       var input = WebMidi.inputs[0];
-      console.log(WebMidi.inputs[0]);
-      output.playNote("C4");
+      //console.log(WebMidi.inputs[0]);
+      //output.playNote("C4");
       input.addListener('noteon', 'all',
          function (e) {
-           console.log("Received 'noteon' message (" + e.note.name + e.note.octave + ").");
+           readNote(WebMidi.noteNameToNumber(e.note.name + e.note.octave));
          }
-       );
-     });
+        );
+      });
 
     </script>
   </body>
