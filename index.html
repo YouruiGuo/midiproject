@@ -1,7 +1,9 @@
 <html>
   <head>
     <script src="node_modules/webmidi/webmidi.min.js"></script>
-    <script src="js/markov.js"></script>
+    <script src="js/markovDuration.js"></script>
+    <script src="js/markovNote.js"></script>
+    <script src="js/playMusic.js"></script>
   </head>
   <body>
     <div>
@@ -20,8 +22,13 @@
       input.addListener('noteon', 'all',
          function (e) {
            readNote(WebMidi.noteNameToNumber(e.note.name + e.note.octave));
+           start_duration((e.note.name + e.note.octave), e.timestamp);
          }
         );
+      input.addListener('noteoff', 'all',
+        function (e) {
+          stop_duration((e.note.name + e.note.octave), e.timestamp);
+        });
       });
 
     </script>

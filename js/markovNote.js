@@ -1,20 +1,21 @@
 
-// generate markov model
+// generate markov model for notes
 var mmodel = new Array(128);
 for (var i = 0; i < mmodel.length; i++) {
   mmodel[i] = new Array(128);
 }
 
-
 var total_num = 0;
 var prev_note = -1;
+
 
 var input_music = new Array();
 var input_notes = new Array();
 var new_music = new Array();
 var new_num = 0;
 
-var threshold = 0.1;
+var threshold = 0.5;
+
 
 function initialization() {
   for (var i = 0; i < mmodel.length; i++) {
@@ -36,22 +37,23 @@ function probability() {
 function start() {
   console.log("start");
   initialization();
+  dur_initialization();
 }
 
-function playMusic() {
-  output = WebMidi.outputs[0];
-  for (var i = 0; i < new_music.length; i++) {
-    output.playNote(new_music[i]);
-    setTimeout(playMusic, 1000);
-  }
-
+function destroy() {
+  new_num = 0;
+  new_music = [];
 }
 
 function stop() {
   console.log("stop");
   probability();
+  dur_probability(total_num);
   generate_music();
-  playMusic();
+  new_duration = generate_duration();
+  console.log(new_music);
+  playMusic(new_music, new_duration);
+  destroy();
 }
 
 function readNote(e) {
