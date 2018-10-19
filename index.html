@@ -19,13 +19,13 @@
       var input = WebMidi.inputs[0];
       //console.log(WebMidi.inputs[0]);
       //output.playNote("C4");
-      input.addListener('noteon', 'all',
+      input.addListener('noteon', 1,
          function (e) {
            readNote(WebMidi.noteNameToNumber(e.note.name + e.note.octave));
            start_duration((e.note.name + e.note.octave), e.timestamp);
          }
         );
-      input.addListener('noteoff', 'all',
+      input.addListener('noteoff', 1,
         function (e) {
           stop_duration((e.note.name + e.note.octave), e.timestamp);
         });

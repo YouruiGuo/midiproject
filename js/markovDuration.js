@@ -114,7 +114,7 @@ function generate_duration () {
       }
       else {
         m = 0;
-        mi = 0;
+        mi = 2; //initialize to quater note
         for (var i = 0; i < dmodel.length; i++) {
           if (dmodel[nl_to_num(x)][i] > m) {
             m = dmodel[nl_to_num(x)][i];
