@@ -88,10 +88,10 @@ function readNote(e) {
     }
     else{
       let note_index = mmodel.findIndex(t => {
-        return t.index = prev_note;
+        return t.index = prev_note; // return the index of mmodel
       });
       let trans_index = mmodel[note_index].transition.findIndex( r => {
-        return r.index = e;
+        return r.index = e; // return the index of transition
       });
       mmodel[note_index].transition[trans_index].probability += 1;
       prev_note = e;
