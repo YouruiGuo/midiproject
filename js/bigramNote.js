@@ -11,30 +11,10 @@ var octavelist = [];
 
 var mmodel = [];
 
-for (var i = 0; i < 3; i++) {
+for (var i = 0; i < 5; i++) {
   for (var j = 0; j < octave.length; j++) {
-    octavelist.push(octave[j]+(i+3).toString());
+    octavelist.push(octave[j]+(i+2).toString());
   }
-}
-
-for (var i = 0; i < octavelist.length; i++) {
-  for (var j = 0; j < octavelist.length; j++) {
-    var obj = {};
-    obj.firstnote = octavelist[i];
-    obj.firstindex = WebMidi.noteNameToNumber(obj.firstnote);
-    obj.secondnote = octavelist[j];
-    obj.secondindex = WebMidi.noteNameToNumber(obj.secondnote);
-    obj.transition = [];
-    for (var k = 0; k < octavelist.length; k++) {
-      var temp = {};
-      temp.note = octavelist[k];
-      temp.index = WebMidi.noteNameToNumber(temp.note);
-      temp.probability = 0;
-      obj.transition.push(temp);
-    }
-    mmodel.push(obj);
-  }
-
 }
 
 var total_num = 0;
@@ -48,12 +28,53 @@ var new_num = 0;
 
 var threshold = 0.1;
 
+function writeToFile() {
+  model = {mmodel: mmodel};
+  var json = JSON.stringify(model);
+  var fs = require('fs');
+  fs.writeFile('bigramNote.json', json, 'utf8', callback);
+}
+
+function loadData() {
+  var fs = require('fs');
+  fs.readFile('bigramNote.json', 'utf8', function readFileCallback(err, data){
+    if (err){
+      initialization();
+      console.log(err);
+    } else {
+      model = JSON.parse(data); //now it an object
+      mmodel = model.mmodel;
+    }
+  });
+}
+
 function initialization() {
+
+  for (var i = 0; i < octavelist.length; i++) {
+    for (var j = 0; j < octavelist.length; j++) {
+      var obj = {};
+      obj.firstnote = octavelist[i];
+      obj.firstindex = WebMidi.noteNameToNumber(obj.firstnote);
+      obj.secondnote = octavelist[j];
+      obj.secondindex = WebMidi.noteNameToNumber(obj.secondnote);
+      obj.transition = [];
+      for (var k = 0; k < octavelist.length; k++) {
+        var temp = {};
+        temp.note = octavelist[k];
+        temp.index = WebMidi.noteNameToNumber(temp.note);
+        temp.probability = 0;
+        obj.transition.push(temp);
+      }
+      mmodel.push(obj);
+    }
+  }
+
   for (var i = 0; i < mmodel.length; i++) {
     for (var j = 0; j < octavelist.length; j++) {
       mmodel[i].transition[j].probability = 0;
     }
   }
+
 }
 
 function probability() {
@@ -62,34 +83,34 @@ function probability() {
       mmodel[i].transition[j].probability /= total_num;
     }
   }
-  new_num = total_num;
 }
 
 function start() {
   console.log("start");
+  //loadData();
   initialization();
   dur_initialization();
-}
-
-function destroy() {
-  new_num = 0;
-  new_music = [];
 }
 
 function stop() {
   console.log("stop");
   probability();
   dur_probability(total_num);
-  generate_music();
-  input_dur, new_duration = generate_duration();
+  result = generate_duration();
+  new_num = result[0];
+  input_dur = result[1];
+  new_duration = result[2];
+  //console.log(new_num, input_dur, new_duration);
+  generate_music(new_num);
   //console.log(new_music);
   playMusic(new_music, new_duration);
   obtainData(input_music, new_music, input_dur, new_duration);
+  //writeToFile();
   //destroy();
 }
 
 function readNote(e) {
-  if (e < 84 && e >= 48) { // check if the note is between c3-c6
+  if (e < WebMidi.noteNameToNumber("C7") && e >= WebMidi.noteNameToNumber("C2")) { // check if the note is between c3-c7
     if ((prev_note1 != -1) && (prev_note2 == -1)) {
       prev_note2 = e;
     }
@@ -118,7 +139,7 @@ function readNote(e) {
   }
 }
 
-function generate_music() {
+function generate_music(new_num) {
   for (var r = 0; r < new_num; r++) {
     e = Math.random();
     if (new_music.length < 2) {

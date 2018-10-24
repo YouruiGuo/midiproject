@@ -15,7 +15,7 @@ function playMusic(new_music, new_dur) {
   //console.log(music);
   //currentTime = WebMidi.time;
   for (var i = 0; i < music.length; i++) {
-    var options = {time: music[i].time, duration: music[i].duration, velocity: 1};
+    var options = {time: music[i].time, duration: music[i].duration, velocity: 0.7};
     output.playNote(music[i].note,2,options);
   }
 

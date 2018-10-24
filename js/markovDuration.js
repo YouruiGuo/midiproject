@@ -14,14 +14,16 @@ var dur_list = ["whole_note", "half_note", "quarter_note",
 
 var new_dur = new Array();
 var newnum = 0;
-var threshold = 0.1;
+var threshold = 0.3;
+var eight_bars = 0;
 
 function dur_initialization() {
-  for (var i = 0; i < dmodel.length; i++) {
-    for (var j = 0; j < dmodel.length; j++) {
+  for (var i = 0; i < dur_list.length; i++) {
+    for (var j = 0; j < dur_list.length; j++) {
       dmodel[i][j] = 0;
     }
   }
+
 }
 
 function get_notebpm () {
@@ -41,6 +43,9 @@ function nl_to_num (length) {
       return i;
     }
   }
+  if (i >= dur_list.length) {
+    return dur_list.length-1;
+  }
 }
 
 function note_length (dur) {
@@ -52,6 +57,7 @@ function note_length (dur) {
     }
     else {
       rt = dur_list[i];
+      break;
     }
   }
   if (Math.abs(dur-note_duration[lt]) > Math.abs(dur-note_duration[rt])) {
@@ -63,12 +69,12 @@ function note_length (dur) {
 }
 
 function dur_probability(total_num) {
-  for (var i = 0; i < dmodel.length; i++) {
-    for (var j = 0; j < dmodel.length; j++) {
-      mmodel[i][j] /= total_num;
+  for (var i = 0; i < dur_list.length; i++) {
+    for (var j = 0; j < dur_list.length; j++) {
+      dmodel[i][j] /= total_num;
     }
   }
-  newnum = total_num;
+
 }
 
 function start_duration(e, timestamp) {
@@ -87,46 +93,75 @@ function stop_duration(e, timestamp) {
       else{
         d = timestamp - noteon_list[i].timestamp;
         next_dur = note_length(d);
-        dmodel[nl_to_num(prev_dur)][nl_to_num(next_dur)] += 1;
+        p = nl_to_num(prev_dur);
+        n = nl_to_num(next_dur);
+        dmodel[p][n] += 1;
         prev_dur = next_dur;
       }
       input_dur.push(prev_dur);
       noteon_list.splice(i, 1);
     }
   }
+  eight_bars = note_duration.whole_note * 8;
 }
 
 // TODO: Generate notes for 8 bars.
 
 function generate_duration () {
-  for (var r = 0; r < newnum; r++) {
-    e = Math.random();
-    if (new_dur.length == 0) {
-      if (e < threshold) {
-        new_dur.push(dur_list[Math.floor(Math.random() * dur_list.length)]);
-      }
-      else {
-        new_dur.push(input_dur[0]);
-      }
+  var time = 0;
+  while (time < eight_bars) {
+    if (eight_bars - time <= note_duration.sixteenth_note) {
+      new_dur.push(dur_list[dur_list.length-1]);
+      time += note_duration[dur_list[dur_list.length-1]];
+      newnum += 1;
+      break;
     }
     else {
-      x = new_dur[new_dur.length - 1];
-      if (e < threshold) {
-        new_dur.push(dur_list[Math.floor(Math.random() * dur_list.length)]);
+      e = Math.random();
+      if (new_dur.length == 0) {
+        if (e < threshold) {
+          a = dur_list[Math.floor(Math.random() * dur_list.length)];
+          new_dur.push(a);
+          time += note_duration[a];
+          newnum += 1;
+        }
+        else {
+          new_dur.push(input_dur[0]);
+          time += note_duration[input_dur[0]];
+          newnum += 1;
+        }
       }
       else {
-        m = 0;
-        mi = 2; //initialize to quater note
-        for (var i = 0; i < dmodel.length; i++) {
-          if (dmodel[nl_to_num(x)][i] > m) {
-            m = dmodel[nl_to_num(x)][i];
-            mi = i;
-          }
+        x = new_dur[new_dur.length - 1];
+        if (e < threshold) {
+          a = dur_list[Math.floor(Math.random() * dur_list.length)];
+          new_dur.push(a);
+          time += note_duration[a];
+          newnum += 1;
         }
-        new_dur.push(dur_list[mi]);
+        else {
+          m = 0;
+          mi = 2; //initialize to quater note
+          for (var i = 0; i < dmodel.length; i++) {
+            if (dmodel[nl_to_num(x)][i] > m) {
+              m = dmodel[nl_to_num(x)][i];
+              mi = i;
+            }
+          }
+          new_dur.push(dur_list[mi]);
+          time += note_duration[dur_list[mi]];
+          newnum += 1;
+        }
       }
     }
   }
-  //console.log(new_dur);
-  return input_dur, new_dur;
+  if (time > eight_bars) {
+    t = time - note_duration[new_dur[new_dur.length - 1]];
+    t = eight_bars - t;
+    d = nl_to_num(t);
+    new_dur.splice(-1,1);
+    new_dur.push(note_length(d));
+  }
+  console.log(newnum, new_dur);
+  return [newnum, input_dur, new_dur];
 }

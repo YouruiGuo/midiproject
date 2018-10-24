@@ -18,7 +18,7 @@
     WebMidi.enable(function (err) {
       var output = WebMidi.outputs[0];
       var input = WebMidi.inputs[0];
-      //console.log(WebMidi.inputs[0]);
+      console.log(WebMidi.outputs);
       //output.playNote("C4");
       input.addListener('noteon', 1,
          function (e) {
