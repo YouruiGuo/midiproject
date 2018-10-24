@@ -12,7 +12,7 @@ function sequence(new_music, new_dur) {
 function playMusic(new_music, new_dur) {
   sequence(new_music, new_dur);
   output = WebMidi.outputs[0];
-  console.log(music);
+  //console.log(music);
   //currentTime = WebMidi.time;
   for (var i = 0; i < music.length; i++) {
     var options = {time: music[i].time, duration: music[i].duration, velocity: 1};

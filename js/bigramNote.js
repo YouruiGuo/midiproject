@@ -1,7 +1,8 @@
 // bigram model for generating music.
+// the same usage of function as markovNote.js.
 
 
-// generate markov model for notes
+// generate bigram model for notes
 // three octaves 3*12 from [c3, c6)
 // c3: 48  c6: 84
 
@@ -35,7 +36,6 @@ for (var i = 0; i < octavelist.length; i++) {
   }
 
 }
-console.log(mmodel);
 
 var total_num = 0;
 var prev_note1 = -1;
@@ -46,7 +46,7 @@ var input_notes = new Array(); // store the number of midi note
 var new_music = new Array();
 var new_num = 0;
 
-var threshold = 0.5;
+var threshold = 0.1;
 
 function initialization() {
   for (var i = 0; i < mmodel.length; i++) {
@@ -81,9 +81,10 @@ function stop() {
   probability();
   dur_probability(total_num);
   generate_music();
-  new_duration = generate_duration();
-  console.log(new_music);
+  input_dur, new_duration = generate_duration();
+  //console.log(new_music);
   playMusic(new_music, new_duration);
+  obtainData(input_music, new_music, input_dur, new_duration);
   //destroy();
 }
 
@@ -148,7 +149,7 @@ function generate_music() {
             max_index = mmodel[note_index].transition[i].index;
           }
         }
-        if (max == 0) { // if all prob are 0.
+        if (max == 0) { // if all prob are 0, randomly choose one from octavelist.
           new_music.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
         }
         else{

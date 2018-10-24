@@ -78,6 +78,7 @@ function stop() {
   new_duration = generate_duration();
   console.log(new_music);
   playMusic(new_music, new_duration);
+  obtainData(new_music, new_duration);
   //destroy();
 }
 

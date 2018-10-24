@@ -4,7 +4,7 @@ for (var i = 0; i < dmodel.length; i++) {
   dmodel[i] = new Array(6);
 }
 
-var bpm = 120;
+var bpm = 120; // the default bpm is 120.
 var prev_dur = -1;
 var noteon_list = new Array();
 var input_dur = new Array();
@@ -14,7 +14,7 @@ var dur_list = ["whole_note", "half_note", "quarter_note",
 
 var new_dur = new Array();
 var newnum = 0;
-var threshold = 0.5;
+var threshold = 0.1;
 
 function dur_initialization() {
   for (var i = 0; i < dmodel.length; i++) {
@@ -96,6 +96,8 @@ function stop_duration(e, timestamp) {
   }
 }
 
+// TODO: Generate notes for 8 bars.
+
 function generate_duration () {
   for (var r = 0; r < newnum; r++) {
     e = Math.random();
@@ -125,6 +127,6 @@ function generate_duration () {
       }
     }
   }
-  console.log(new_dur);
-  return new_dur;
+  //console.log(new_dur);
+  return input_dur, new_dur;
 }
