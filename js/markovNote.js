@@ -8,45 +8,36 @@ var octavelist = [];
 
 var mmodel = [];
 
-for (var i = 0; i < 3; i++) {
+for (var i = 0; i < 5; i++) {
   for (var j = 0; j < octave.length; j++) {
-    octavelist.push(octave[j]+(i+3).toString());
+    octavelist.push(octave[j]+(i+2).toString());
   }
 }
 
-for (var i = 0; i < octavelist.length; i++) {
-  var obj = {};
-  obj.note = octavelist[i];
-  obj.index = WebMidi.noteNameToNumber(obj.note);
-  obj.transition = [];
-  for (var j = 0; j < octavelist.length; j++) {
-    var temp = {};
-    temp.note = octavelist[j];
-    temp.index = WebMidi.noteNameToNumber(temp.note);
-    temp.probability = 0;
-    obj.transition.push(temp);
-  }
-  mmodel.push(obj);
-}
-console.log(mmodel);
 
 var total_num = 0;
 var prev_note = -1;
 
-
 var input_music = new Array(); // store the number of midi note
 var input_notes = new Array(); // store the number of midi note
-var new_music = new Array();
-var new_num = 0;
 
-var threshold = 0.5;
 
 
 function initialization() {
-  for (var i = 0; i < mmodel.length; i++) {
+  for (var i = 0; i < octavelist.length; i++) {
+    var obj = {};
+    obj.note = octavelist[i];
+    obj.index = WebMidi.noteNameToNumber(obj.note);
+    obj.transition = [];
     for (var j = 0; j < octavelist.length; j++) {
-      mmodel[i].transition[j].probability = 0;
+      var temp = {};
+      temp.note = octavelist[j];
+      temp.index = WebMidi.noteNameToNumber(temp.note);
+      temp.probability = 0;
+      temp.count = 0;
+      obj.transition.push(temp);
     }
+    mmodel.push(obj);
   }
 }
 
@@ -71,30 +62,43 @@ function destroy() {
 }
 
 function stop() {
+  console.log(mmodel);
   console.log("stop");
-  probability();
-  dur_probability(total_num);
-  generate_music();
-  new_duration = generate_duration();
-  console.log(new_music);
+  r = obtainData(input_music, input_dur);
+  score_note = r[0];
+  score_dur = r[1];
+  console.log("input");
+  console.log(r);
+  r = episode(score_note, score_dur);
+  new_music = r[0];
+  new_duration = r[1];
   playMusic(new_music, new_duration);
-  obtainData(new_music, new_duration);
-  //destroy();
+
 }
 
 function readNote(e) {
-  if (e < 84 && e >= 48) { // check if the note is between c3-c6
+  if (e < WebMidi.noteNameToNumber("C7") && e >= WebMidi.noteNameToNumber("C2")) { // check if the note is between c3-c6
     if (prev_note == -1) {
       prev_note = e;
     }
     else{
-      let note_index = mmodel.findIndex(t => {
-        return t.index = prev_note; // return the index of mmodel
-      });
-      let trans_index = mmodel[note_index].transition.findIndex( r => {
-        return r.index = e; // return the index of transition
-      });
-      mmodel[note_index].transition[trans_index].probability += 1;
+      for (x = 0; x < mmodel.length; x++) {
+        if (mmodel[x].index == prev_note) {
+          note_index = x;
+          break;
+        }
+      }
+      //console.log(prev, note_index);
+      for (y = 0; y < mmodel[note_index].transition.length; y++) {
+        if (mmodel[note_index].transition[y].index == e) {
+          trans_index = y;
+          break;
+        }
+      }
+      p = mmodel[note_index].transition[trans_index].probability;
+      c = mmodel[note_index].transition[trans_index].count;
+      mmodel[note_index].transition[trans_index].probability = (p*c + 1)/(c+1);
+      mmodel[note_index].transition[trans_index].count += 1;
       prev_note = e;
     }
     input_music.push(e);
@@ -105,40 +109,5 @@ function readNote(e) {
   }
   else {
     console.log("invalid input");
-  }
-}
-
-function generate_music() {
-  for (var r = 0; r < new_num; r++) {
-    e = Math.random();
-    if (new_music.length == 0) {
-      // generate the first note whether with the first note of input or any notes from octavelist.
-      if (e < threshold) {
-        new_music.push(octavelist[Math.floor(Math.random() * octavelist.length)]);
-      }
-      else {
-        new_music.push(input_music[0]);
-      }
-    }
-    else {
-      n = new_music[new_music.length - 1];
-      let note_index = mmodel.findIndex(t => {
-        return t.index = n;
-      });
-      if (e < threshold) {
-        new_music.push(octavelist[Math.floor(Math.random() * octavelist.length)]);
-      }
-      else {
-        max = 0;
-        max_index = 0;
-        for (var i = 0; i < mmodel[note_index].transition.length; i++) {
-          if (mmodel[note_index].transition[i].probability > max) {
-            max = mmodel[note_index].transition[i].probability;
-            max_index = mmodel[note_index].transition[i].index;
-          }
-        }
-        new_music.push(max_index);
-      }
-    }
   }
 }

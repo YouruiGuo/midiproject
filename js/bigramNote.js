@@ -23,10 +23,7 @@ var prev_note2 = -1;
 
 var input_music = new Array(); // store the number of midi note
 var input_notes = new Array(); // store the number of midi note
-var new_music = new Array();
 var new_num = 0;
-
-var threshold = 0.1;
 
 function writeToFile() {
   model = {mmodel: mmodel};
@@ -63,6 +60,7 @@ function initialization() {
         temp.note = octavelist[k];
         temp.index = WebMidi.noteNameToNumber(temp.note);
         temp.probability = 0;
+        temp.count = 0;
         obj.transition.push(temp);
       }
       mmodel.push(obj);
@@ -77,13 +75,6 @@ function initialization() {
 
 }
 
-function probability() {
-  for (var i = 0; i < mmodel.length; i++) {
-    for (var j = 0; j < mmodel[i].length; j++) {
-      mmodel[i].transition[j].probability /= total_num;
-    }
-  }
-}
 
 function start() {
   console.log("start");
@@ -94,17 +85,18 @@ function start() {
 
 function stop() {
   console.log("stop");
-  probability();
-  dur_probability(total_num);
-  result = generate_duration();
-  new_num = result[0];
-  input_dur = result[1];
-  new_duration = result[2];
-  //console.log(new_num, input_dur, new_duration);
-  generate_music(new_num);
-  //console.log(new_music);
+  //probability();
+  //dur_probability(total_num);
+
+  r = obtainData(input_music, input_dur);
+  score_note = r[0];
+  score_dur = r[1];
+  console.log("input");
+  console.log(r);
+  r = episode(score_note, score_dur);
+  new_music = r[0];
+  new_duration = r[1];
   playMusic(new_music, new_duration);
-  obtainData(input_music, new_music, input_dur, new_duration);
   //writeToFile();
   //destroy();
 }
@@ -114,7 +106,7 @@ function readNote(e) {
     if ((prev_note1 != -1) && (prev_note2 == -1)) {
       prev_note2 = e;
     }
-    if ((prev_note1 == -1) && (prev_note2 == -1)) {
+    else if ((prev_note1 == -1) && (prev_note2 == -1)) {
       prev_note1 = e;
     }
     else{
@@ -124,7 +116,10 @@ function readNote(e) {
       let trans_index = mmodel[note_index].transition.findIndex( r => {
         return r.index = e; // return the index of transition
       });
-      mmodel[note_index].transition[trans_index].probability += 1;
+      p = mmodel[note_index].transition[trans_index].probability;
+      c = mmodel[note_index].transition[trans_index].count;
+      mmodel[note_index].transition[trans_index].probability = (p*c + 1)/(c+1);
+      mmodel[note_index].transition[trans_index].count += 1;
       prev_note1 = prev_note2;
       prev_note2 = e;
     }
@@ -136,47 +131,5 @@ function readNote(e) {
   }
   else {
     console.log("invalid input");
-  }
-}
-
-function generate_music(new_num) {
-  for (var r = 0; r < new_num; r++) {
-    e = Math.random();
-    if (new_music.length < 2) {
-      // generate the first two notes whether with the first two notes of input
-      // or any notes from octavelist.
-      if (e < threshold) {
-        new_music.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
-      }
-      else {
-        new_music.push(input_music[new_music.length]);
-      }
-    }
-    else {
-      n1 = new_music[new_music.length - 2];
-      n2 = new_music[new_music.length - 1];
-      let note_index = mmodel.findIndex(t => {
-        return ((t.firstindex == n1) && (t.secondindex == n2));
-      });
-      if (e < threshold) {
-        new_music.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
-      }
-      else {
-        max = 0;
-        max_index = 0;
-        for (var i = 0; i < mmodel[note_index].transition.length; i++) {
-          if (mmodel[note_index].transition[i].probability > max) {
-            max = mmodel[note_index].transition[i].probability;
-            max_index = mmodel[note_index].transition[i].index;
-          }
-        }
-        if (max == 0) { // if all prob are 0, randomly choose one from octavelist.
-          new_music.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
-        }
-        else{
-          new_music.push(max_index);
-        }
-      }
-    }
   }
 }

@@ -6,27 +6,19 @@ var metric_new_note = [];
 var metric_input_dur = [];
 var metric_new_dur = [];
 
-function obtainData(input_music, new_music, input_dur, new_dur) {
-  metric_input_note = zipf(input_music);
-  metric_new_note = zipf(new_music);
-  metric_input_dur = zipf(input_dur);
-  metric_new_dur = zipf(new_dur);
+function obtainData(music, dur) {
+  metric_note = zipf(music);
+  metric_dur = zipf(dur);
 
-  r = getXY(metric_input_note);
-  input_n = linearRegression(r[0], r[1]);
-  console.log(input_n);
+  r = getXY(metric_note);
+  note = linearRegression(r[0], r[1]);
+  //console.log(note);
 
-  r = getXY(metric_new_note);
-  newnote = linearRegression(r[0], r[1]);
-  console.log(newnote);
+  r = getXY(metric_dur);
+  dr = linearRegression(r[0], r[1]);
+  //console.log(dr);
 
-  r = getXY(metric_input_dur);
-  input_dr = linearRegression(r[0], r[1]);
-  console.log(input_dr);
-
-  r = getXY(metric_new_dur);
-  newdr = linearRegression(r[0], r[1]);
-  console.log(newdr);
+  return [note, dr];
 }
 
 function getXY(data) {
