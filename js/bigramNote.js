@@ -87,7 +87,7 @@ function stop() {
   console.log("stop");
   //probability();
   //dur_probability(total_num);
-
+  console.log(mmodel);
   r = obtainData(input_music, input_dur);
   score_note = r[0];
   score_dur = r[1];

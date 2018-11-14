@@ -16,7 +16,7 @@ function episode(score_note, score_dur) {
     note_reward = get_note_reward(note, score_note);
     //console.log(i, note);
     if (note_reward > 0) {
-      console.log(note_reward);
+      console.log(i, note_reward);
     }
     updateNoteValue(note_reward, new_episode);
     //updateDurValue(dur, new_dur);
@@ -33,6 +33,7 @@ function episode(score_note, score_dur) {
   return [new_music, new_duration];
 }
 
+// for bigram
 /*
 function generate_music(new_num) {
   var threshold = 0.1;
@@ -52,9 +53,13 @@ function generate_music(new_num) {
     else {
       n1 = new_episode[new_episode.length - 2];
       n2 = new_episode[new_episode.length - 1];
-      let note_index = mmodel.findIndex(t => {
-        return ((t.firstindex == n1) && (t.secondindex == n2));
-      });
+      for (x = 0; x < mmodel.length; x++) {
+        if (mmodel[x].firstindex == n1 && mmodel[x].secondindex == n2) {
+          note_index = x;
+          break;
+        }
+      }
+
       if (e < threshold) {
         new_episode.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
       }
@@ -80,36 +85,36 @@ function generate_music(new_num) {
 }
 */
 
+// for markov
+
 function generate_music(new_num, learn) {
   new_episode = [];
-  var threshold = 0.1;
-  /*
+  var threshold = 0.12;
+
   if (learn == 0) {
-    threshold = 0;
-  }*/
+    threshold = 0.08;
+  }
   for (var r = 0; r < new_num; r++) {
     e = Math.random();
     if (new_episode.length == 0) {
       // generate the first note whether with the first note of input or any notes from octavelist.
-      if (e < threshold) {
+      //if (e < threshold) {
         new_episode.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
-      }
-      else {
-        new_episode.push(input_music[0]);
-      }
+      //}
+      //else {
+      //  new_episode.push(input_music[0]);
+      //}
     }
     else {
       n = new_episode[new_episode.length - 1];
+      var note_index = -1;
       for (x = 0; x < mmodel.length; x++) {
         if (mmodel[x].index == n) {
           note_index = x;
           break;
         }
       }
-      /*
-      let note_index = mmodel.findIndex(t => {
-        return (t.index == n);
-      });*/
+
       if (e < threshold) {
         new_episode.push(WebMidi.noteNameToNumber(octavelist[Math.floor(Math.random() * octavelist.length)]));
       }
@@ -134,7 +139,6 @@ function generate_music(new_num, learn) {
   }
   return new_episode;
 }
-
 
 
 // TODO: Generate notes for 8 bars.
@@ -205,7 +209,7 @@ function get_note_reward(note, score_note){
   //console.log(note, score_note);
   score = Math.abs(note.slope, score_note.slope);
 
-  if (score <= 0.05) {
+  if (score <= 0.008) {
     return 1;
   }
 /*
@@ -219,6 +223,7 @@ function get_note_reward(note, score_note){
 
 }
 
+// for markov
 
 function updateNoteValue(note_reward, new_episode) {
   prev = -1; // the first note
@@ -254,6 +259,7 @@ function updateNoteValue(note_reward, new_episode) {
 }
 
 
+// for bigram
 /*
 function updateNoteValue(note_reward, new_episode) {
   prev1 = -1; // the first note
@@ -268,13 +274,18 @@ function updateNoteValue(note_reward, new_episode) {
       prev1 = e;
     }
     else{
-      let note_index = mmodel.findIndex(t => {
-        return ((t.firstindex == prev1) && (t.secondindex == prev2)); // return the index of mmodel
-      });
-      let trans_index = mmodel[note_index].transition.findIndex( r => {
-        return (r.index == e); // return the index of transition
-      });
-      console.log(note_index, trans_index);
+      for (x = 0; x < mmodel.length; x++) {
+        if (mmodel[x].firstindex == prev1 && mmodel[x].secondindex == prev2) {
+          note_index = x;
+          break;
+        }
+      }
+      for (y = 0; y < mmodel[note_index].transition.length; y++) {
+        if (mmodel[note_index].transition[y].index == e) {
+          trans_index = y;
+          break;
+        }
+      }
       p = mmodel[note_index].transition[trans_index].probability;
       c = mmodel[note_index].transition[trans_index].count;
       mmodel[note_index].transition[trans_index].probability = (p*c + note_reward)/(c+1);
