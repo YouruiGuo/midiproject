@@ -62,8 +62,10 @@ function destroy() {
 }
 
 function stop() {
-  console.log(mmodel);
+  //console.log(mmodel);
   console.log("stop");
+  bigramInitialization();
+  /*
   r = obtainData(input_music, input_dur);
   score_note = r[0];
   score_dur = r[1];
@@ -73,7 +75,7 @@ function stop() {
   new_music = r[0];
   new_duration = r[1];
   playMusic(new_music, new_duration);
-
+*/
 }
 
 function readNote(e) {
