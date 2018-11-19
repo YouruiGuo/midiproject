@@ -29,7 +29,7 @@ function bigramInitialization() {
     }
   }
   //console.log(input_music);
-  updateBigram(1);
+  updateBigram(input_music, 1);
   monteCarlo(inputNotesScore, inputDurScore);
   //console.log(r[0]);
 }
@@ -37,8 +37,8 @@ function bigramInitialization() {
 function monteCarlo(inputNotesScore, inputDurScore) {
   var numep = 10000;
   for (var i = 0; i < numep; i++) {
-    r = generate_Ep();
-    s = obtainData(r[0], r[1]);
+    res = generate_Ep();
+    s = obtainData(res[0], res[1]);
     score_note = s[0];
     score_dur = s[1];
     diff = Math.abs(inputNotesScore, score_note);
@@ -48,24 +48,34 @@ function monteCarlo(inputNotesScore, inputDurScore) {
     else {
       ret = 0;
     }
-    updateBigram(ret);
+    updateBigram(res[0], ret);
+    diff_dur = Math.abs(inputDurScore, score_dur);
+    if (diff < 0.1) {
+      ret = 1;
+    }
+    else {
+      ret = 0;
+    }
+    updateMarkov(res[1], ret);
   }
+
   r = generate_Ep();
   console.log(bigram_model);
   console.log(r[0]);
   playMusic(r[0], r[1]);
 }
 
-function updateBigram(score) {
+function updateBigram(mus, score) {
   var prev1 = -1;
   var prev2 = -1;
-  for (var i = 0; i < input_music.length; i++) {
-    var inote = numberToNoteName(input_music[i]);
+  //console.log(mus);
+  for (var i = 0; i < mus.length; i++) {
+    var inote = numberToNoteName(mus[i]);
     //console.log(inote);
     var index = -1;
     if (i < 2) {
-      prev1 = numberToNoteName(input_music[0]);
-      prev2 = numberToNoteName(input_music[1]);
+      prev1 = numberToNoteName(mus[0]);
+      prev2 = numberToNoteName(mus[1]);
     }
     else{
       for (var j = 0; j < bigram_model.length; j++) {
@@ -75,13 +85,14 @@ function updateBigram(score) {
         }
       }
       for (var k = 0; k < octave.length; k++) {
-        if (octave[k] == numberToNoteName(input_music[i])) {
+        if (octave[k] == numberToNoteName(mus[i])) {
+          //console.log(i);
           c = bigram_model[index].transition[k].count;
           p = bigram_model[index].transition[k].probability;
           bigram_model[index].transition[k].probability = (p*c + score)/(c+1);
           bigram_model[index].transition[k].count += 1;
           prev1 = prev2;
-          prev2 = numberToNoteName(input_music[i]);
+          prev2 = numberToNoteName(mus[i]);
           break;
         }
       }
@@ -89,6 +100,17 @@ function updateBigram(score) {
 
   }
   //console.log(bigram_model);
+}
+
+function updateMarkov(dur, score) {
+  for (var i = 0; i < dur.length-1; i++) {
+    curr = nl_to_num(dur[i]);
+    next = nl_to_num(dur[i+1]);
+    c = dmodel[curr].transition[next].count;
+    p = dmodel[curr].transition[next].probability;
+    dmodel[curr].transition[next].probability = (p*c + score) / (c + 1);
+    dmodel[curr].transition[next].count += 1;
+  }
 }
 
 function generate_Ep() {

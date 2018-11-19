@@ -158,17 +158,10 @@ function generate_duration () {
     else {
       e = Math.random();
       if (new_dur.length == 0) {
-        if (e < threshold) {
-          a = dur_list[Math.floor(Math.random() * dur_list.length)];
-          new_dur.push(a);
-          time += note_duration[a];
-          newnum += 1;
-        }
-        else {
-          new_dur.push(input_dur[0]);
-          time += note_duration[input_dur[0]];
-          newnum += 1;
-        }
+        a = dur_list[Math.floor(Math.random() * dur_list.length)];
+        new_dur.push(a);
+        time += note_duration[a];
+        newnum += 1;
       }
       else {
         x = new_dur[new_dur.length - 1];
@@ -182,8 +175,8 @@ function generate_duration () {
           m = 0;
           mi = 2; //initialize to quater note
           for (var i = 0; i < dmodel.length; i++) {
-            if (dmodel[nl_to_num(x)][i] > m) {
-              m = dmodel[nl_to_num(x)][i];
+            if (dmodel[nl_to_num(x)].transition[i].probability > m) {
+              m = dmodel[nl_to_num(x)].transition[i].probability;
               mi = i;
             }
           }

@@ -1,8 +1,5 @@
 // generate markov model for duration
-var dmodel = new Array(6);
-for (var i = 0; i < dmodel.length; i++) {
-  dmodel[i] = new Array(6);
-}
+var dmodel = [];
 
 var bpm = 120; // the default bpm is 120.
 var prev_dur = -1;
@@ -18,9 +15,17 @@ var eight_bars = 0;
 
 function dur_initialization() {
   for (var i = 0; i < dur_list.length; i++) {
+    var obj = {};
+    obj.dur = dur_list[i];
+    obj.transition = [];
     for (var j = 0; j < dur_list.length; j++) {
-      dmodel[i][j] = 0;
+      var temp = {};
+      temp.next_dur = dur_list[j];
+      temp.count = 0;
+      temp.probability = 0;
+      obj.transition.push(temp);
     }
+    dmodel.push(obj);
   }
 
 }
@@ -67,14 +72,6 @@ function note_length (dur) {
   }
 }
 
-function dur_probability(total_num) {
-  for (var i = 0; i < dur_list.length; i++) {
-    for (var j = 0; j < dur_list.length; j++) {
-      dmodel[i][j] /= total_num;
-    }
-  }
-}
-
 function start_duration(e, timestamp) {
   var note_obj = {note: e, timestamp: timestamp};
   noteon_list.push(note_obj);
@@ -93,7 +90,10 @@ function stop_duration(e, timestamp) {
         next_dur = note_length(d);
         p = nl_to_num(prev_dur);
         n = nl_to_num(next_dur);
-        dmodel[p][n] += 1;
+        c = dmodel[p].transition[n].count;
+        pr = dmodel[p].transition[n].probability;
+        dmodel[p].transition[n].probability = (p*c + 1)/(c+1);
+        dmodel[p].transition[n].count += 1;
         prev_dur = next_dur;
       }
       input_dur.push(prev_dur);
