@@ -173,14 +173,20 @@ function generate_duration (thre) {
         }
         else {
           m = 0;
-          mi = 2; //initialize to quater note
+          mi = 0; //initialize to quater note
           for (var i = 0; i < dmodel.length; i++) {
             if (dmodel[nl_to_num(x)].transition[i].probability > m) {
               m = dmodel[nl_to_num(x)].transition[i].probability;
               mi = i;
             }
           }
-          new_dur.push(dur_list[mi]);
+          if (m == 0) {
+            a = dur_list[Math.floor(Math.random() * dur_list.length)];
+          }
+          else {
+            a = dur_list[mi];
+          }
+          new_dur.push(a);
           time += note_duration[dur_list[mi]];
           newnum += 1;
         }
