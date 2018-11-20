@@ -143,8 +143,8 @@ function generate_music(new_num, learn) {
 
 // TODO: Generate notes for 8 bars.
 
-function generate_duration () {
-  var threshold = 0.05;
+function generate_duration (thre) {
+  var threshold = thre;
   var new_dur = [];
   var newnum = 0;
   var time = 0;

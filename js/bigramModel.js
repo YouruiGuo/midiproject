@@ -6,11 +6,20 @@ function numberToNoteName(e) {
   return octave[num];
 }
 
+function transformToNotes(m) {
+  var rets = [];
+  for (var i = 0; i < m.length; i++) {
+    rets.push(numberToNoteName(m[i]));
+  }
+  return rets;
+}
+
 function bigramInitialization() {
   console.log(input_music);
   re = obtainData(input_music, input_dur); //get the score of input music
   inputNotesScore = re[0];
   inputDurScore = re[1];
+  console.log(inputNotesScore);
 
   for (var i = 0; i < octave.length; i++) {
     for (var j = 0; j < octave.length; j++) {
@@ -35,31 +44,38 @@ function bigramInitialization() {
 }
 
 function monteCarlo(inputNotesScore, inputDurScore) {
-  var numep = 10000;
+  var numep = 100000;
+  var t = 0.2;
   for (var i = 0; i < numep; i++) {
-    res = generate_Ep();
+    res = generate_Ep(t);
     s = obtainData(res[0], res[1]);
     score_note = s[0];
     score_dur = s[1];
-    diff = Math.abs(inputNotesScore, score_note);
-    if (diff < 0.1) {
-      ret = 1;
+    //console.log(inputNotesScore, score_note);
+    //console.log(score_note);
+    diff = Math.abs(inputNotesScore.slope - score_note.slope);
+    var ret1;
+    if (diff < 0.0001) {
+      ret1 = 1;
+      console.log("note");
     }
     else {
-      ret = 0;
+      ret1 = 0;
     }
-    updateBigram(res[0], ret);
-    diff_dur = Math.abs(inputDurScore, score_dur);
-    if (diff < 0.1) {
-      ret = 1;
+    updateBigram(res[0], ret1);
+    diff_dur = Math.abs(inputDurScore.slope - score_dur.slope);
+    var ret2;
+    if (diff_dur < 0.0001) {
+      ret2 = 1;
+      console.log("score_dur");
     }
     else {
-      ret = 0;
+      ret2 = 0;
     }
-    updateMarkov(res[1], ret);
+    updateMarkov(res[1], ret2);
   }
 
-  r = generate_Ep();
+  r = generate_Ep(0.1);
   console.log(bigram_model);
   console.log(r[0]);
   playMusic(r[0], r[1]);
@@ -113,9 +129,38 @@ function updateMarkov(dur, score) {
   }
 }
 
-function generate_Ep() {
-  var threshold = 0.1;
-  result = generate_duration();
+// find out the closest note
+function generate_Note(previous, curr) {
+  /*
+  oct = Math.ceil((previous-24)/12);
+  //console.log(previous);
+
+  if (oct > 5) {
+    oct = 5;
+    //console.log("here");
+  }
+  else if (oct < 4) {
+    oct = 4;
+  }*/
+  curr_cand = new Array(3);
+  oct = 4;
+  curr_cand[0] = WebMidi.noteNameToNumber(curr + oct.toString());
+  curr_cand[1] = WebMidi.noteNameToNumber(curr + (oct+1).toString());
+  curr_cand[2] = WebMidi.noteNameToNumber(curr + (oct-1).toString());
+  min = 1000;
+  mindex = 0;
+  for (var i = 0; i < 3; i++) {
+    if (Math.abs(curr_cand[i]-previous)< min) {
+        min = Math.abs(curr_cand[i]-previous);
+        mindex = curr_cand[i];
+    }
+  }
+  return mindex;
+}
+
+function generate_Ep(t) {
+  var threshold = t;
+  result = generate_duration(0.1);
   newnum = result[0];
   newdur = result[1];
   //console.log(newnum, newdur);
@@ -127,13 +172,14 @@ function generate_Ep() {
       new_ep.push(WebMidi.noteNameToNumber(octave[Math.floor(Math.random()*octave.length)] + "4"));
     }
     else {
+      prev1 = numberToNoteName(new_ep[new_ep.length-2]);
+      prev2 = numberToNoteName(new_ep[new_ep.length-1]);
       e = Math.random();
       if (e < threshold) {
-        new_ep.push(WebMidi.noteNameToNumber(octave[Math.floor(Math.random()*octave.length)] + "4"));
+        random_note = octave[Math.floor(Math.random()*octave.length)];
+        new_ep.push(generate_Note(new_ep[new_ep.length-1], random_note));
       }
       else {
-        prev1 = numberToNoteName(new_ep[new_ep.length-2]);
-        prev2 = numberToNoteName(new_ep[new_ep.length-1]);
         for (var j = 0; j < bigram_model.length; j++) {
           if (bigram_model[j].firstnote == prev1 && bigram_model[j].secondnote == prev2) {
             index = j;
@@ -150,10 +196,11 @@ function generate_Ep() {
           }
         }
         if (max == 0) {
-          new_ep.push(WebMidi.noteNameToNumber(octave[Math.floor(Math.random()*octave.length)] + "4"));
+          random_note = octave[Math.floor(Math.random()*octave.length)]
+          new_ep.push(generate_Note(new_ep[new_ep.length-1], random_note));
         }
         else {
-          new_ep.push(WebMidi.noteNameToNumber(octave[maxindex]+"4"));
+          new_ep.push(generate_Note(new_ep[new_ep.length-1], octave[maxindex]));
         }
       }
     }
