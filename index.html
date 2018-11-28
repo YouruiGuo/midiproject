@@ -9,16 +9,13 @@
     <script src="js/metrics.js"></script>
     <script src="js/generateEpisode.js"></script>
     <script src="js/parseMIDIFile.js"></script>
-    <script src="js/bundle.js"></script>
   </head>
   <body>
 
     <div>
-      <input type="button" onclick="document.getElementById('fu').click()"
-      value="Click to select file" />
+      <input type="file" id="files" name="files[]" multiple />
       <span id="fileName"></span>
     </div>
-    <input type="file" id="fu" onchange="FileSelected()" style="width: 0;">
     <div>
       <button type="button" onclick="start()">start</button>
       <button type="button" onclick="stop()">stop</button>
@@ -27,11 +24,8 @@
     <div id="generate_music"></div>
 
     <script type="text/javascript">
-    function FileSelected(e) {
-      file = document.getElementById('fu').files[document.getElementById('fu').files.length - 1];
-      document.getElementById('fileName').innerHtml= file.name;
-      parseFile(file.name);
-    }
+    document.getElementById('files').addEventListener('change', FileSelected, false);
+
     WebMidi.enable(function (err) {
       var output = WebMidi.outputs[0];
       var input = WebMidi.inputs[0];
