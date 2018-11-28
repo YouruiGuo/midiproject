@@ -1,0 +1,25 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "midiconvert": "^0.4.7",
+    "webmidi": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YouruiGuo/midiproject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YouruiGuo/midiproject/issues"
+  },
+  "homepage": "https://github.com/YouruiGuo/midiproject#readme"
+}

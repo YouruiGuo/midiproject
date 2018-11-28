@@ -75,10 +75,17 @@ function monteCarlo(inputNotesScore, inputDurScore) {
     updateMarkov(res[1], ret2);
   }
 
-  r = generate_Ep(0.1);
+  var ro, rest;
+  ro = generate_Ep(0.1);
+  rest = obtainData(ro[0], ro[1]);
+  /*
+  while (Math.abs(inputNotesScore.slope - rest[0].slope) > 0.0001) {
+    ro = generate_Ep(0.1);
+    rest = obtainData(ro[0], ro[1]);
+  }*/
   console.log(bigram_model);
-  console.log(r[0]);
-  playMusic(r[0], r[1]);
+  console.log(ro[0]);
+  playMusic(ro[0], ro[1]);
 }
 
 function updateBigram(mus, score) {
