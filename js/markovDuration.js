@@ -8,6 +8,10 @@ var input_dur = new Array();
 var note_duration = {}
 var dur_list = ["whole_note", "half_note", "quarter_note",
                 "dotted_eighth_note", "eighth_note", "sixteenth_note"];
+var count_dur = new Array(dur_list.length);
+for (var i = 0; i < count_dur.length; i++) {
+  count_dur[i] = 0;
+}
 
 var new_dur = new Array();
 var newnum = 0;
@@ -88,6 +92,7 @@ function stop_duration(e, timestamp) {
       else{
         d = timestamp - noteon_list[i].timestamp;
         next_dur = note_length(d);
+        count_dur[nl_to_num(prev_dur)] += 1;
         p = nl_to_num(prev_dur);
         n = nl_to_num(next_dur);
         c = dmodel[p].transition[n].count;
@@ -100,5 +105,5 @@ function stop_duration(e, timestamp) {
       noteon_list.splice(i, 1);
     }
   }
-  eight_bars = note_duration.whole_note * 8;
+  eight_bars = note_duration.whole_note * 16; // generate 16 bars.
 }

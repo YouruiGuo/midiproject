@@ -1,5 +1,6 @@
 var notes = new Array();
 var bigram_model = [];
+var largestcountdur = -1; // the index of duration with largest count number.
 function numberToNoteName(e) {
   // midi number 24 -> C1
   num = (e-24)%12;
@@ -14,8 +15,24 @@ function transformToNotes(m) {
   return rets;
 }
 
+function countDur() {
+  // if the probability of transitions in this state is 0,
+  // set the duration to the one with the largest counts.
+  var maxdur = -1;
+  var maxdurindex = -1;
+  for (var i = 0; i < count_dur.length; i++) {
+    if (count_dur[i] > maxdur) {
+        maxdur = count_dur[i];
+        maxdurindex = i;
+    }
+  }
+  return maxdurindex;
+}
+
 function bigramInitialization() {
   console.log(input_music);
+  largestcountdur = countDur();
+  //console.log(largestcountdur);
   re = obtainData(input_music, input_dur); //get the score of input music
   inputNotesScore = re[0];
   inputDurScore = re[1];
@@ -76,7 +93,7 @@ function monteCarlo(inputNotesScore, inputDurScore) {
   }
 
   var ro, rest;
-  ro = generate_Ep(0.1);
+  ro = generate_Ep(0.15);
   rest = obtainData(ro[0], ro[1]);
   /*
   while (Math.abs(inputNotesScore.slope - rest[0].slope) > 0.0001) {
@@ -167,7 +184,7 @@ function generate_Note(previous, curr) {
 
 function generate_Ep(t) {
   var threshold = t;
-  result = generate_duration(0.1);
+  result = generate_duration(0.1, largestcountdur);
   newnum = result[0];
   newdur = result[1];
   //console.log(newnum, newdur);

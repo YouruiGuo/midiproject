@@ -143,7 +143,7 @@ function generate_music(new_num, learn) {
 
 // TODO: Generate notes for 8 bars.
 
-function generate_duration (thre) {
+function generate_duration (thre, largestcountdur) {
   var threshold = thre;
   var new_dur = [];
   var newnum = 0;
@@ -181,7 +181,10 @@ function generate_duration (thre) {
             }
           }
           if (m == 0) {
-            a = dur_list[Math.floor(Math.random() * dur_list.length)];
+            //a = dur_list[Math.floor(Math.random() * dur_list.length)];
+            // if the probability of transitions in this state is 0,
+            // set the duration to the one with the largest counts.
+            a = dur_list[largestcountdur];
           }
           else {
             a = dur_list[mi];
