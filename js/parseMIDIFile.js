@@ -13,6 +13,7 @@ function parseFile(file){
 	reader.onload = function(e){
 		var partsData = MidiConvert.parse(e.target.result);
 		var mididata = JSON.stringify(partsData, undefined, 2);
+    header = partsData.header;
     bpm = partsData.header.bpm;
     //console.log(bpm);
 	};
