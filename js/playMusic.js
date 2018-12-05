@@ -41,10 +41,11 @@ function writeToFile(new_music, new_dur) {
   var blob = new Blob([JSON.stringify(midi.toJSON())], {type: "application/json"});
   var fileName = "output.txt";
   saveAs(blob, fileName);
+  /*
   console.log(midi.fromJSON(jsonf));
   var blob = new Blob([jsonf.fromJSON()], {type: "octet/stream"});
   var fileName = "output.midi";
-  saveAs(blob, fileName);
+  saveAs(blob, fileName);*/
   //var file = new File([blob], "output.mid", {type: "octet/stream", lastModified: Date.now()});
   //FileSaver.saveAs(file);
   //fs.writeFileSync("output.mid", midi.encode(), "binary")

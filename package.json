@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.html",
   "dependencies": {
+    "file-saver": "^2.0.0",
     "fs": "0.0.1-security",
     "midiconvert": "^0.4.7",
     "webmidi": "^2.3.0"
